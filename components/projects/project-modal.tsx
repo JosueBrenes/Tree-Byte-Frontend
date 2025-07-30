@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { MapPin, Star, Users, Leaf } from "lucide-react";
+import AdoptTreeButton from "@/components/adopt-tree/adopt-tree-button";
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -195,9 +196,9 @@ export default function ProjectModal({
           >
             Need information?
           </Button>
-          <Button className="flex-1 bg-[#7EF45D] hover:bg-[#6DE04A] text-black">
-            Apply to this project
-          </Button>
+          <div className="flex-1">
+            <AdoptTreeButton projectId={project.id} />
+          </div>
         </div>
       </DialogContent>
     </Dialog>
