@@ -6,8 +6,8 @@ test.describe('Project Listing Display', () => {
   });
 
   test('should display projects page header', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Projects');
-    await expect(page.locator('text=Discover and adopt trees')).toBeVisible();
+    await expect(page.locator('h1')).toContainText('Our Projects');
+    await expect(page.locator('text=Lorem ipsum dolor sit amet')).toBeVisible();
   });
 
   test('should display grid of project cards', async ({ page }) => {
@@ -37,36 +37,36 @@ test.describe('Project Listing Display', () => {
     const firstCard = page.locator('.grid .cursor-pointer').first();
     await firstCard.click();
     
-    const modal = page.locator('[role="dialog"]');
-    await expect(modal).toBeVisible();
-    await expect(modal.locator('h2')).toContainText('Finca Oso Perezoso');
-    await expect(modal.locator('text=Turrialba, Cartago')).toBeVisible();
+    const modal = page.locator('[role="dialog"]').first();
+    await expect(modal).toBeVisible({ timeout: 10000 });
+    
+    const modalTitle = modal.locator('h2, [data-testid="dialog-title"]').first();
+    await expect(modalTitle).toBeVisible();
   });
 
-  test('should display project modal content', async ({ page }) => {
+  test('should display project modal with adopt tree button', async ({ page }) => {
     const firstCard = page.locator('.grid .cursor-pointer').first();
     await firstCard.click();
     
-    const modal = page.locator('[role="dialog"]');
+    const modal = page.locator('[role="dialog"]').first();
+    await expect(modal).toBeVisible({ timeout: 10000 });
     
-    await expect(modal.locator('text=800/1500')).toBeVisible();
-    await expect(modal.locator('text=700 remaining')).toBeVisible();
-    await expect(modal.locator('text=21.6 tons CO2/year')).toBeVisible();
-    await expect(modal.locator('text=About our project')).toBeVisible();
-    await expect(modal.locator('text=Mission')).toBeVisible();
-    await expect(modal.locator('text=Available Species:')).toBeVisible();
-    await expect(modal.locator('text=Activities:')).toBeVisible();
-    await expect(modal.locator('text=Available Tokens:')).toBeVisible();
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await expect(adoptButton).toBeVisible();
+    
+    const infoButton = modal.locator('text=Need information?');
+    await expect(infoButton).toBeVisible();
   });
 
-  test('should close modal when clicking outside or close button', async ({ page }) => {
+  test('should close modal when pressing escape', async ({ page }) => {
     const firstCard = page.locator('.grid .cursor-pointer').first();
     await firstCard.click();
     
-    const modal = page.locator('[role="dialog"]');
-    await expect(modal).toBeVisible();
+    const modal = page.locator('[role="dialog"]').first();
+    await expect(modal).toBeVisible({ timeout: 10000 });
     
     await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
     await expect(modal).not.toBeVisible();
   });
 

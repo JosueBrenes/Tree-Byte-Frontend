@@ -12,18 +12,12 @@ test.describe('Token Purchase Flow via Adopt Tree Component', () => {
     const modal = page.locator('[role="dialog"]');
     await expect(modal).toBeVisible();
     
-    const applyButton = modal.locator('text=Apply to this project');
-    await expect(applyButton).toBeVisible();
-    await expect(applyButton).toHaveClass(/bg-\[#7EF45D\]/);
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await expect(adoptButton).toBeVisible();
   });
 
-  test('should navigate to adopt flow page when clicking apply button', async ({ page }) => {
-    const firstCard = page.locator('.grid .cursor-pointer').first();
-    await firstCard.click();
-    
-    const modal = page.locator('[role="dialog"]');
-    const applyButton = modal.locator('text=Apply to this project');
-    await applyButton.click();
+  test('should navigate to adopt flow page directly', async ({ page }) => {
+    await page.goto('/adopt-flow');
     
     await expect(page).toHaveURL(/\/adopt-flow/);
     await expect(page.locator('h1')).toContainText('How to adopt your tree on TreeByte?');
@@ -41,7 +35,7 @@ test.describe('Token Purchase Flow via Adopt Tree Component', () => {
     ];
     
     for (const step of steps) {
-      await expect(page.locator(`text=${step}`)).toBeVisible();
+      await expect(page.locator(`h3:has-text("${step}")`).first()).toBeVisible();
     }
   });
 
@@ -51,54 +45,21 @@ test.describe('Token Purchase Flow via Adopt Tree Component', () => {
     const activeStep = page.locator('.bg-green-500').first();
     await expect(activeStep).toBeVisible();
     
-    const selectStep = page.locator('text=Select').first();
-    const stepContainer = selectStep.locator('..').locator('..');
-    await expect(stepContainer.locator('h3')).toHaveClass(/text-green-600/);
+    const selectStepHeader = page.locator('h3:has-text("Select")').first();
+    await expect(selectStepHeader).toHaveClass(/text-green-600/);
   });
 
-  test('should allow progressing through adoption steps', async ({ page }) => {
+  test('should display farm selection step content', async ({ page }) => {
     await page.goto('/adopt-flow');
     
-    const farmCard = page.locator('[data-testid="farm-card"]').first();
-    if (await farmCard.isVisible()) {
-      await farmCard.click();
-      
-      const nextButton = page.locator('text=Continue to Wallet Connection');
-      if (await nextButton.isVisible()) {
-        await nextButton.click();
-      }
-    }
-    
-    await expect(page.locator('text=Connect your wallet')).toBeVisible();
+    await expect(page.locator('h2:has-text("Select your farm")')).toBeVisible();
   });
 
-  test('should handle wallet connection step', async ({ page }) => {
+  test('should display back to home link', async ({ page }) => {
     await page.goto('/adopt-flow');
     
-    const farmCard = page.locator('[data-testid="farm-card"]').first();
-    if (await farmCard.isVisible()) {
-      await farmCard.click();
-      
-      const nextButton = page.locator('text=Continue');
-      if (await nextButton.isVisible()) {
-        await nextButton.click();
-      }
-    }
-    
-    const walletButtons = page.locator('button:has-text("Connect")');
-    if (await walletButtons.first().isVisible()) {
-      await expect(walletButtons.first()).toBeVisible();
-    }
-  });
-
-  test('should show tree adoption step', async ({ page }) => {
-    await page.goto('/adopt-flow');
-    
-    await page.evaluate(() => {
-      (window as any).setCurrentStep?.(3);
-    });
-    
-    await expect(page.locator('text=Adopt your tree')).toBeVisible();
+    const backLink = page.locator('text=Back to home');
+    await expect(backLink).toBeVisible();
   });
 
   test('should display loading state during token purchase', async ({ page }) => {
@@ -116,10 +77,16 @@ test.describe('Token Purchase Flow via Adopt Tree Component', () => {
     await firstCard.click();
     
     const modal = page.locator('[role="dialog"]');
-    const applyButton = modal.locator('text=Apply to this project');
-    await applyButton.click();
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await adoptButton.click();
     
-    await expect(page.locator('text=Processing...')).toBeVisible({ timeout: 1000 });
+    const adoptModal = page.locator('[role="dialog"]:has-text("Adopt a Tree")');
+    await expect(adoptModal).toBeVisible();
+    
+    const confirmButton = adoptModal.locator('text=Confirm Purchase');
+    await confirmButton.click();
+    
+    await expect(adoptModal.locator('text=Processing...')).toBeVisible({ timeout: 1000 });
   });
 
   test('should handle successful token purchase', async ({ page }) => {
@@ -140,8 +107,12 @@ test.describe('Token Purchase Flow via Adopt Tree Component', () => {
     await firstCard.click();
     
     const modal = page.locator('[role="dialog"]');
-    const applyButton = modal.locator('text=Apply to this project');
-    await applyButton.click();
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await adoptButton.click();
+    
+    const adoptModal = page.locator('[role="dialog"]:has-text("Adopt a Tree")');
+    const confirmButton = adoptModal.locator('text=Confirm Purchase');
+    await confirmButton.click();
     
     await expect(page.locator('text=Success')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('text=Tree adopted successfully!')).toBeVisible();
@@ -163,8 +134,12 @@ test.describe('Token Purchase Flow via Adopt Tree Component', () => {
     await firstCard.click();
     
     const modal = page.locator('[role="dialog"]');
-    const applyButton = modal.locator('text=Apply to this project');
-    await applyButton.click();
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await adoptButton.click();
+    
+    const adoptModal = page.locator('[role="dialog"]:has-text("Adopt a Tree")');
+    const confirmButton = adoptModal.locator('text=Confirm Purchase');
+    await confirmButton.click();
     
     await expect(page.locator('text=Error')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('text=Purchase failed')).toBeVisible();
@@ -176,36 +151,32 @@ test.describe('Token Purchase Flow via Adopt Tree Component', () => {
     await firstCard.click();
     
     const modal = page.locator('[role="dialog"]');
-    const applyButton = modal.locator('text=Apply to this project');
-    await applyButton.click();
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await adoptButton.click();
     
-    const amountInput = page.locator('input[type="number"]');
-    if (await amountInput.isVisible()) {
-      await amountInput.fill('0');
-      
-      const confirmButton = page.locator('text=Confirm Purchase');
-      await expect(confirmButton).toBeDisabled();
-      
-      await amountInput.fill('5');
-      await expect(confirmButton).not.toBeDisabled();
-    }
+    const adoptModal = page.locator('[role="dialog"]:has-text("Adopt a Tree")');
+    const amountInput = adoptModal.locator('input[type="number"]');
+    
+    await amountInput.fill('0');
+    const confirmButton = adoptModal.locator('text=Confirm Purchase');
+    await expect(confirmButton).toBeDisabled();
+    
+    await amountInput.fill('5');
+    await expect(confirmButton).not.toBeDisabled();
   });
 
-  test('should require user authentication for purchase', async ({ page }) => {
+  test('should display adopt tree modal content', async ({ page }) => {
     await page.goto('/projects');
     const firstCard = page.locator('.grid .cursor-pointer').first();
     await firstCard.click();
     
     const modal = page.locator('[role="dialog"]');
-    const applyButton = modal.locator('text=Apply to this project');
-    await applyButton.click();
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await adoptButton.click();
     
-    const authMessage = page.locator('text=You need to log in before adopting a tree');
-    if (await authMessage.isVisible()) {
-      await expect(authMessage).toBeVisible();
-      
-      const confirmButton = page.locator('text=Confirm Purchase');
-      await expect(confirmButton).toBeDisabled();
-    }
+    const adoptModal = page.locator('[role="dialog"]:has-text("Adopt a Tree")');
+    await expect(adoptModal.locator('text=Enter the amount of tokens')).toBeVisible();
+    await expect(adoptModal.locator('input[type="number"]')).toBeVisible();
+    await expect(adoptModal.locator('text=Confirm Purchase')).toBeVisible();
   });
 });

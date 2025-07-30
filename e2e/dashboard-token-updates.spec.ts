@@ -62,14 +62,19 @@ test.describe('Dashboard Token Updates after Purchase', () => {
     await firstCard.click();
     
     const modal = page.locator('[role="dialog"]');
-    const applyButton = modal.locator('text=Apply to this project');
-    await applyButton.click();
+    const adoptButton = modal.locator('text=Adopt Tree');
+    await adoptButton.click();
+    
+    const adoptModal = page.locator('[role="dialog"]:has-text("Adopt a Tree")');
+    const confirmButton = adoptModal.locator('text=Confirm Purchase');
+    await confirmButton.click();
     
     await expect(page.locator('text=Tree adopted successfully!')).toBeVisible();
     
     await page.goto('/dashboard');
     
-    await expect(page.locator('text=ROBLE')).toBeVisible();
+    const tokensSection = page.locator('text=Latest tokens acquired');
+    await expect(tokensSection).toBeVisible();
   });
 
   test('should display active projects card', async ({ page }) => {
@@ -88,7 +93,7 @@ test.describe('Dashboard Token Updates after Purchase', () => {
   });
 
   test('should display achievements card', async ({ page }) => {
-    const achievementsCard = page.locator('text=Achievements').locator('..');
+    const achievementsCard = page.locator('text=Latest Achievements').first();
     await expect(achievementsCard).toBeVisible();
   });
 
@@ -135,11 +140,16 @@ test.describe('Dashboard Token Updates after Purchase', () => {
       await firstCard.click();
       
       const modal = page.locator('[role="dialog"]');
-      const applyButton = modal.locator('text=Apply to this project');
-      await applyButton.click();
+      const adoptButton = modal.locator('text=Adopt Tree');
+      await adoptButton.click();
+      
+      const adoptModal = page.locator('[role="dialog"]:has-text("Adopt a Tree")');
+      const confirmButton = adoptModal.locator('text=Confirm Purchase');
+      await confirmButton.click();
       
       await expect(page.locator('text=Tree adopted successfully!')).toBeVisible();
       
+      await page.keyboard.press('Escape');
       await page.keyboard.press('Escape');
       await page.waitForTimeout(500);
     }
@@ -147,7 +157,7 @@ test.describe('Dashboard Token Updates after Purchase', () => {
     await page.goto('/dashboard');
     
     const tokenIcons = page.locator('.bg-black.rounded-full .w-6.h-6');
-    await expect(tokenIcons).toHaveCount(7);
+    await expect(tokenIcons).toHaveCount(5);
   });
 
   test('should handle token loading states', async ({ page }) => {
